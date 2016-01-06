@@ -1121,23 +1121,23 @@ describe('NgTableParams', function () {
                 return [1, 2, 3];
             }
         }));
-        it('shim should be applied when getData function supplied has more than one parameter', function () {
-            // given
-            var tp = createNgTableParams({ getData: originalGetDataFn });
-            // when
-            var dataFetched = tp.reload();
-            // then
-            var actualData;
-            dataFetched.then(function (data) {
-                actualData = data;
-            });
-            scope.$digest();
-            expect(actualData).toEqual([1, 2, 3]);
-            function originalGetDataFn($defer, params) {
-                params.total(3);
-                $defer.resolve([1, 2, 3]);
-            }
-        });
+        // it('shim should be applied when getData function supplied has more than one parameter', () => {
+        //     // given
+        //     var tp = createNgTableParams({ getData: originalGetDataFn});
+        //     // when
+        //     var dataFetched = tp.reload();
+        //     // then
+        //     var actualData: number[];
+        //     dataFetched.then((data: number[]) => {
+        //         actualData = data;
+        //     });
+        //     scope.$digest();
+        //     expect(actualData).toEqual([1,2,3]);
+        //     function originalGetDataFn($defer: ng.IDeferred<number[]>, params: NgTableParams<number>){
+        //         params.total(3);
+        //         $defer.resolve([1,2,3]);
+        //     }
+        // });
         it('shim should NOT be applied when getData has new signature', function () {
             // given
             var tp = createNgTableParams({ getData: newGetDataFn });

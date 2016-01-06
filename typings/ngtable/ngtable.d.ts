@@ -381,7 +381,7 @@ declare namespace NgTable {
          * Typically you will supply a custom function when you need to execute filtering, paging and sorting
          * on the server
          */
-        getData?: IGetDataFunc<T> | IInterceptableGetDataFunc<T> | ILegacyGetDataFunc<T>;
+        getData?: IGetDataFunc<T> | IInterceptableGetDataFunc<T>;
         /** 
          * The function that will be used group data rows according to the groupings returned by `NgTableParams.group()`
         */
@@ -668,6 +668,90 @@ declare namespace NgTable {
         publishAfterReloadData<T>(publisher: NgTableParams<T>, newData: T[], oldData: T[]): void;
         publishDatasetChanged<T>(publisher: NgTableParams<T>, newDataset: T[], oldDataset: T[]): void;
         publishPagesChanged<T>(publisher: NgTableParams<T>, newPages: NgTable.IPageButton[], oldPages: NgTable.IPageButton[]): void;
+    }
+    
+    interface IColumnFieldContext extends ng.IScope {
+        $column: IColumnDef;
+        $columns: IColumnDef[];
+    }
+    
+    interface IColumnField<T> {
+        (context?: IColumnFieldContext) : T;
+        assign($scope: ng.IScope, value: T): void;
+    }
+    
+    /**
+     * The definition of the column within a ngTable.
+     * When using `ng-table` directive a column definition will be parsed from each `td` tag found in the
+     * `tr` data row tag.
+     * 
+     * @example
+     * <tr>
+     *  <td data-title="'Name of User'" filter="{ username: 'text'}" sortable="'username'" />
+     *  <td data-title="'Age of User'" filter="{ age: 'number'}" sortable="'age'" />
+     * </tr>
+     */
+    interface IColumnDef {
+        /**
+         * Custom CSS class that should be added to the `th` tag(s) of this column in the table header
+         * 
+         * To set this on the `td` tag of a html table use the attribute `header-class` or `data-header-class`
+         */
+        class: IColumnField<string>;
+        /**
+         * The
+         */
+        data?: NgTable.SelectData;
+        /**
+         * The index position of this column within the `$columns` container array 
+         */
+        id: number;
+        /**
+         * The definition of 0 or more html filter templates that should be rendered for this column in
+         * the table header
+         */
+        filter: IColumnField<NgTable.IFilterTemplateMap>;
+        /**
+         * Supplies the `ISelectOption`s that can be used in a html filter template for this colums.
+         * At the creation of the `NgTableParams` this field will be called and the result then assigned
+         * to the `data` field of this column.
+         */
+        filterData: IColumnField<ng.IPromise<NgTable.SelectData> | NgTable.SelectData>;
+        /**
+         * The name of the data row field that will be used to group on, or false when this column
+         * does not support grouping
+         */
+        groupable: IColumnField<string|boolean>;
+        /**
+         * The url of a custom html template that should be used to render a table header for this column
+         * 
+         * To set this on the `td` tag for a html table use the attribute `header` or `data-header`
+         */
+        headerTemplateURL: IColumnField<string|boolean>;
+        /**
+         * The text that should be used as a tooltip for this column in the table header
+         */
+        headerTitle: IColumnField<string>;
+        /**
+         * Determines whether this column should be displayed in the table
+         * 
+         * To set this on the `td` tag for a html table use the attribute `ng-if`
+         */
+        show: IColumnField<boolean>;
+        /**
+         * The name of the data row field that will be used to sort on, or false when this column
+         * does not support sorting
+         */
+        sortable: IColumnField<string|boolean>;
+        /**
+         * The title of this column that should be displayed in the table header
+         */
+        title: IColumnField<string>;
+        /**
+         * An alternate column title. Typically this can be used for responsive table layouts
+         * where the titleAlt should be used for small screen sizes
+         */
+        titleAlt: IColumnField<string>;
     }
 }
 
