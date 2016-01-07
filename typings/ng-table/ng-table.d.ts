@@ -8,7 +8,7 @@ declare class NgTableParams<T> {
      * The page of data rows currently being displayed in the table
      */
     data: T[];
-    
+
     constructor(baseParameters?: NgTable.IParamValues, baseSettings?: NgTable.ISettings<T>)
     
     /**
@@ -74,7 +74,7 @@ declare class NgTableParams<T> {
     /**
      * Returns true when the `group` and when supplied, the `sortDirection` matches an existing group
      */
-    hasGroup(group: string|NgTable.IGroupingFunc, sortDirection? : string): boolean
+    hasGroup(group: string | NgTable.IGroupingFunc, sortDirection?: string): boolean
     /**
      * Return true when a change to this instance should require the `reload` method
      * to be run so as to ensure the data rows presented to the user reflects the current state.
@@ -153,7 +153,7 @@ declare class NgTableParams<T> {
 }
 
 declare namespace NgTable {
-        
+
     interface IDataSettings {
         applyPaging?: boolean;
     }
@@ -163,7 +163,7 @@ declare namespace NgTable {
      * an instance of `NgTableParams`  
      */
     interface IDefaults {
-        params? : IParamValues;
+        params?: IParamValues;
         settings?: ISettings<any>
     }
 
@@ -177,7 +177,7 @@ declare namespace NgTable {
      * Set the value of a key to undefined to let value of `ISettings.defaultSort` apply
      */
     interface ISortingValues { [name: string]: string }
-    
+
     type Grouping = IGroupValues | IGroupingFunc;
 
     /**
@@ -190,7 +190,7 @@ declare namespace NgTable {
      * that the `item` should be placed within
      */
     interface IGroupingFunc {
-        (item: any) : string;
+        (item: any): string;
         /**
          * 'asc' or 'desc'; leave undefined to let the value of `ISettings.groupOptions.defaultSort` apply
          */
@@ -223,19 +223,19 @@ declare namespace NgTable {
          */
         group?: string | Grouping;
     }
-    
-    
+
+
     type FilterComparator<T> = boolean | IFilterComparatorFunc<T>;
-    
+
     interface IFilterComparatorFunc<T> {
         (actual: T, expected: T): boolean;
     }
-    
+
     interface IFilterFunc<T> {
         (data: T[], filter: IFilterValues, filterComparator: FilterComparator<T>): T[]
     }
 
-    
+
     interface IFilterSettings<T> {
         /**
          * Use this to determine how items are matched against the filter values.
@@ -277,7 +277,7 @@ declare namespace NgTable {
          */
         filterLayout?: string
     }
-    
+
     interface IGroupSettings {
         /**
          * The default sort direction that will be used whenever a group is supplied that
@@ -448,7 +448,7 @@ declare namespace NgTable {
          */
         getUrlForAlias(aliasName: string, filterKey?: string): string
     }
-    
+
     interface InternalTableParams<T> extends NgTableParams<T> {
         isNullInstance: boolean
     }
@@ -461,16 +461,16 @@ declare namespace NgTable {
         response?: <TData>(data: TData, params: NgTableParams<T>) => TData;
         responseError?: (reason: any, params: NgTableParams<T>) => any;
     }
-    
-    type SelectData = ISelectOption[] | ISelectDataFunc    
-    
+
+    type SelectData = ISelectOption[] | ISelectDataFunc
+
     interface ISelectOption {
         id: string | number;
         title: string;
     }
-    
+
     interface ISelectDataFunc {
-        () : ISelectOption[] | ng.IPromise<ISelectOption[]>
+        (): ISelectOption[] | ng.IPromise<ISelectOption[]>
     }    
         
     /**
@@ -478,14 +478,14 @@ declare namespace NgTable {
      * On construction of `NgTableParams` the `ngTableEventsChannel` will fire its `afterCreated` event.
      */
     interface ITableParamsConstructor<T> {
-        new(baseParameters?: IParamValues, baseSettings?: ISettings<T>): NgTableParams<T>
+        new (baseParameters?: IParamValues, baseSettings?: ISettings<T>): NgTableParams<T>
     }
-    
+
 
     namespace Data {
-        
+
         type DataResult<T> = T | IDataRowGroup<T>;
-        
+
         interface IDataRowGroup<T> {
             data: T[];
             $hideRows: boolean;
@@ -537,9 +537,9 @@ declare namespace NgTable {
             */
             sortingFilterName: string
         }
-        
+
         interface IGetDataBcShimFunc<T> {
-            (originalFunc: ILegacyGetDataFunc<T>) : { (params: NgTableParams<T>): ng.IPromise<T[]> }
+            (originalFunc: ILegacyGetDataFunc<T>): { (params: NgTableParams<T>): ng.IPromise<T[]> }
         }
         
         /**
@@ -550,9 +550,9 @@ declare namespace NgTable {
         interface IGetDataFunc<T> {
             (params: NgTableParams<T>): T[] | ng.IPromise<T[]>;
         }
-        
+
         interface IGetGroupFunc<T> {
-            (params: NgTableParams<T>): { [name: string] : IDataRowGroup<T>[]}
+            (params: NgTableParams<T>): { [name: string]: IDataRowGroup<T>[] }
         }
         
         /**
@@ -566,30 +566,30 @@ declare namespace NgTable {
         }
 
         interface ILegacyGetDataFunc<T> {
-            ($defer: ng.IDeferred<T[]>, params: NgTableParams<T>) : void
-        }     
+            ($defer: ng.IDeferred<T[]>, params: NgTableParams<T>): void
+        }
     }
-    
+
     namespace Events {
         interface IEventSelectorFunc {
-            (publisher: NgTableParams<any>) : boolean
+            (publisher: NgTableParams<any>): boolean
         }
-    
+
         type EventSelector = NgTableParams<any> | IEventSelectorFunc
-        
+
         interface IDatasetChangedListener {
-            (publisher: NgTableParams<any>, newDataset: any[], oldDataset: any[]) : any 
+            (publisher: NgTableParams<any>, newDataset: any[], oldDataset: any[]): any
         }
         interface IAfterCreatedListener {
-            (publisher: NgTableParams<any>) : any 
+            (publisher: NgTableParams<any>): any
         }
         interface IAfterReloadDataListener {
-            (publisher: NgTableParams<any>, newData: NgTable.Data.DataResult<any>[], oldData: NgTable.Data.DataResult<any>[]) : any 
+            (publisher: NgTableParams<any>, newData: NgTable.Data.DataResult<any>[], oldData: NgTable.Data.DataResult<any>[]): any
         }
         interface IPagesChangedListener {
-            (publisher: NgTableParams<any>, newPages: NgTable.IPageButton[], oldPages: NgTable.IPageButton[]) : any 
+            (publisher: NgTableParams<any>, newPages: NgTable.IPageButton[], oldPages: NgTable.IPageButton[]): any
         }
-        
+
         interface IEventsChannel {
             /**
              * Subscribe to receive notification whenever a new `NgTableParams` instance has finished being constructed.
@@ -665,23 +665,23 @@ declare namespace NgTable {
              * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
              */
             onPagesChanged(listener: Events.IPagesChangedListener, eventFilter?: Events.EventSelector): Function;
-            
+
             publishAfterCreated<T>(publisher: NgTableParams<T>): void;
             publishAfterReloadData<T>(publisher: NgTableParams<T>, newData: T[], oldData: T[]): void;
             publishDatasetChanged<T>(publisher: NgTableParams<T>, newDataset: T[], oldDataset: T[]): void;
             publishPagesChanged<T>(publisher: NgTableParams<T>, newPages: NgTable.IPageButton[], oldPages: NgTable.IPageButton[]): void;
         }
-    }    
-    
+    }
+
     namespace Columns {
-        
-        type ColumnFieldContext = ng.IScope & { 
+
+        type ColumnFieldContext = ng.IScope & {
             $column: IColumnDef;
             $columns: IColumnDef[];
         }
-        
+
         interface IColumnField<T> {
-            (context?: ColumnFieldContext) : T;
+            (context?: ColumnFieldContext): T;
             assign($scope: ng.IScope, value: T): void;
         }
         
@@ -726,13 +726,13 @@ declare namespace NgTable {
              * The name of the data row field that will be used to group on, or false when this column
              * does not support grouping
              */
-            groupable: IColumnField<string|boolean>;
+            groupable: IColumnField<string | boolean>;
             /**
              * The url of a custom html template that should be used to render a table header for this column
              * 
              * To set this on the `td` tag for a html table use the attribute `header` or `data-header`
              */
-            headerTemplateURL: IColumnField<string|boolean>;
+            headerTemplateURL: IColumnField<string | boolean>;
             /**
              * The text that should be used as a tooltip for this column in the table header
              */
@@ -747,7 +747,7 @@ declare namespace NgTable {
              * The name of the data row field that will be used to sort on, or false when this column
              * does not support sorting
              */
-            sortable: IColumnField<string|boolean>;
+            sortable: IColumnField<string | boolean>;
             /**
              * The title of this column that should be displayed in the table header
              */
@@ -758,9 +758,9 @@ declare namespace NgTable {
              */
             titleAlt: IColumnField<string>;
         }
-        
+
         type DynamicTableColField<T> = IDynamicTableColFieldFunc<T> | T;
-        
+
         interface IDynamicTableColFieldFunc<T> {
             (context: ColumnFieldContext): T;
         }
@@ -788,11 +788,11 @@ declare namespace NgTable {
              * The name of the data row field that will be used to group on, or false when this column
              * does not support grouping
              */
-            groupable?: DynamicTableColField<string|boolean>;
+            groupable?: DynamicTableColField<string | boolean>;
             /**
              * The url of a custom html template that should be used to render a table header for this column
              */
-            headerTemplateURL?: DynamicTableColField<string|boolean>;
+            headerTemplateURL?: DynamicTableColField<string | boolean>;
             /**
              * The text that should be used as a tooltip for this column in the table header
              */
@@ -808,14 +808,14 @@ declare namespace NgTable {
             sortable?: DynamicTableColField<string>;
             /**
              * The title of this column that should be displayed in the table header
-             */        
+             */
             title?: DynamicTableColField<string>;
             /**
              * An alternate column title. Typically this can be used for responsive table layouts
              * where the titleAlt should be used for small screen sizes
-             */        
+             */
             titleAlt?: DynamicTableColField<string>;
         }
-    }   
+    }
 }
 
