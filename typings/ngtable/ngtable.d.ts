@@ -54,7 +54,7 @@ declare class NgTableParams<T> {
      */
     group(group: NgTable.Grouping): NgTableParams<T>
     /**
-     * Return true when an attempt to `reload` the current `parameter` values have resulted in a failure.
+     * Returns true when an attempt to `reload` the current `parameter` values have resulted in a failure.
      * This method will continue to return true until the `reload` is successfully called or when the
      * `parameter` values have changed
      */
@@ -135,7 +135,7 @@ declare class NgTableParams<T> {
     total(): number
     /**
      * Sets `settings().total` to the value supplied.
-     * Typically you will need to set a `total` in the body of a any custom `getData` function
+     * Typically you will need to set a `total` in the body of any custom `getData` function
      * you supply as a setting value to this instance.
      * @example
      * var tp = new NgTableParams({}, { getData: customGetData })
@@ -670,13 +670,13 @@ declare namespace NgTable {
         publishPagesChanged<T>(publisher: NgTableParams<T>, newPages: NgTable.IPageButton[], oldPages: NgTable.IPageButton[]): void;
     }
     
-    interface IColumnFieldContext extends ng.IScope {
+    type ColumnFieldContext = ng.IScope & { 
         $column: IColumnDef;
         $columns: IColumnDef[];
     }
     
     interface IColumnField<T> {
-        (context?: IColumnFieldContext) : T;
+        (context?: ColumnFieldContext) : T;
         assign($scope: ng.IScope, value: T): void;
     }
     
@@ -699,9 +699,9 @@ declare namespace NgTable {
          */
         class: IColumnField<string>;
         /**
-         * The
+         * The `ISelectOption`s that can be used in a html filter template for this colums.
          */
-        data?: NgTable.SelectData;
+        data?: SelectData;
         /**
          * The index position of this column within the `$columns` container array 
          */
@@ -710,13 +710,13 @@ declare namespace NgTable {
          * The definition of 0 or more html filter templates that should be rendered for this column in
          * the table header
          */
-        filter: IColumnField<NgTable.IFilterTemplateMap>;
+        filter: IColumnField<IFilterTemplateMap>;
         /**
          * Supplies the `ISelectOption`s that can be used in a html filter template for this colums.
          * At the creation of the `NgTableParams` this field will be called and the result then assigned
          * to the `data` field of this column.
          */
-        filterData: IColumnField<ng.IPromise<NgTable.SelectData> | NgTable.SelectData>;
+        filterData: IColumnField<ng.IPromise<SelectData> | SelectData>;
         /**
          * The name of the data row field that will be used to group on, or false when this column
          * does not support grouping
@@ -752,6 +752,61 @@ declare namespace NgTable {
          * where the titleAlt should be used for small screen sizes
          */
         titleAlt: IColumnField<string>;
+    }
+    
+    type DynamicTableColField<T> = IDynamicTableColFieldFunc<T> | T;
+    
+    interface IDynamicTableColFieldFunc<T> {
+        (context: ColumnFieldContext): T;
+    }
+    
+    interface IDynamicTableColDef {
+        /**
+         * Custom CSS class that should be added to the `th` tag(s) of this column in the table header
+         */
+        class?: DynamicTableColField<string>;
+        /**
+         * The definition of 0 or more html filter templates that should be rendered for this column in
+         * the table header
+         */
+        filter?: DynamicTableColField<IFilterTemplateMap>;
+        /**
+         * Supplies the `ISelectOption`s that can be used in a html filter template for this colums.
+         * At the creation of the `NgTableParams` this field will be called and the result then assigned
+         * to the `data` field of this column.
+         */
+        filterData?: DynamicTableColField<ng.IPromise<SelectData> | SelectData>;
+        /**
+         * The name of the data row field that will be used to group on, or false when this column
+         * does not support grouping
+         */
+        groupable?: DynamicTableColField<string|boolean>;
+        /**
+         * The url of a custom html template that should be used to render a table header for this column
+         */
+        headerTemplateURL?: DynamicTableColField<string|boolean>;
+        /**
+         * The text that should be used as a tooltip for this column in the table header
+         */
+        headerTitle?: DynamicTableColField<string>;
+        /**
+         * Determines whether this column should be displayed in the table
+         */
+        show?: DynamicTableColField<boolean>;
+        /**
+         * The name of the data row field that will be used to sort on, or false when this column
+         * does not support sorting
+         */
+        sortable?: DynamicTableColField<string>;
+        /**
+         * The title of this column that should be displayed in the table header
+         */        
+        title?: DynamicTableColField<string>;
+        /**
+         * An alternate column title. Typically this can be used for responsive table layouts
+         * where the titleAlt should be used for small screen sizes
+         */        
+        titleAlt?: DynamicTableColField<string>;
     }
 }
 
