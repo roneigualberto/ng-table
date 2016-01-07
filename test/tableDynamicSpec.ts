@@ -9,8 +9,8 @@ describe('ng-table-dynamic', function() {
     
 
     
-    interface IExtendedDynamicTableColDef extends NgTable.IDynamicTableColDef {
-        field: NgTable.DynamicTableColField<string>
+    interface IExtendedDynamicTableColDef extends NgTable.Columns.IDynamicTableColDef {
+        field: NgTable.Columns.DynamicTableColField<string>
     }
     
     interface ICustomizedScope extends ng.IScope {
@@ -57,7 +57,7 @@ describe('ng-table-dynamic', function() {
                     '</table>' +
                     '</div>');
 
-            function getCustomClass(context: NgTable.ColumnFieldContext){
+            function getCustomClass(context: NgTable.Columns.ColumnFieldContext){
                 if (context.$column.title().indexOf('Money') !== -1){
                     return 'moneyHeaderClass';
                 } else{
@@ -65,7 +65,7 @@ describe('ng-table-dynamic', function() {
                 }
             }
 
-            function money(context: NgTable.ColumnFieldContext) {
+            function money(context: NgTable.Columns.ColumnFieldContext) {
                 let selectOptions = [{
                     'id': 10,
                     'title': '10'
@@ -226,7 +226,7 @@ describe('ng-table-dynamic', function() {
                     '</table>' +
                     '</div>');
 
-            function getCustomClass(parmasScope: NgTable.ColumnFieldContext){
+            function getCustomClass(parmasScope: NgTable.Columns.ColumnFieldContext){
                 if (parmasScope.$column.title().indexOf('Money') !== -1){
                     return 'moneyHeaderClass';
                 } else{
@@ -494,7 +494,7 @@ describe('ng-table-dynamic', function() {
                 var inputs = elm.find('thead').find('tr').eq(1).find('th').eq(1).find('select');
                 var select = inputs.eq(0) as ng.IAugmentedJQuery;
                 expect((select[0] as HTMLSelectElement).options.length).toBeGreaterThan(0);
-                var $column = (select.scope() as NgTable.ColumnFieldContext).$column;
+                var $column = (select.scope() as NgTable.Columns.ColumnFieldContext).$column;
                 var plucker = _.partialRight(_.pick, ['id', 'title']);
                 var actual = _.map($column.data as NgTable.ISelectOption[], plucker);
                 expect(actual).toEqual([{
@@ -513,7 +513,7 @@ describe('ng-table-dynamic', function() {
                 var inputs = elm.find('thead').find('tr').eq(1).find('th').eq(2).find('select');
                 var select = inputs.eq(0) as ng.IAugmentedJQuery;
                 expect((select[0] as HTMLSelectElement).options.length).toBeGreaterThan(0);
-                var $column = (select.scope() as NgTable.ColumnFieldContext).$column;
+                var $column = (select.scope() as NgTable.Columns.ColumnFieldContext).$column;
                 var plucker = _.partialRight(_.pick, ['id', 'title']);
                 var actual = _.map($column.data as NgTable.ISelectOption[], plucker);
                 expect(actual).toEqual([{
@@ -562,11 +562,11 @@ describe('ng-table-dynamic', function() {
 
         describe('dynamic filter', function(){
 
-            var ageFilter: NgTable.IFilterTemplateMap;
+            var ageFilter: NgTable.IFilterTemplateDefMap;
             beforeEach(inject(function($compile: ng.ICompileService, NgTableParams: NgTable.ITableParamsConstructor<IPerson>) {
 
                 ageFilter = { age: 'text'};
-                function getFilter(paramsScope: NgTable.ColumnFieldContext): NgTable.IFilterTemplateMap{
+                function getFilter(paramsScope: NgTable.Columns.ColumnFieldContext): NgTable.IFilterTemplateDefMap{
                     if (paramsScope.$column.title() === 'Name of user') {
                         return {username: 'text'};
                     } else if (paramsScope.$column.title() === 'Age') {

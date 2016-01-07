@@ -5,11 +5,11 @@ describe('ngTableDefaultGetData', () => {
     }
 
     describe('provider', () => {
-        let ngTableDefaultGetDataProvider: NgTable.IDefaultGetDataProvider;
+        let ngTableDefaultGetDataProvider: NgTable.Data.IDefaultGetDataProvider;
 
         beforeEach(angular.mock.module("ngTable"));
         beforeEach(() => {
-            angular.mock.module((_ngTableDefaultGetDataProvider_: NgTable.IDefaultGetDataProvider) => {
+            angular.mock.module((_ngTableDefaultGetDataProvider_: NgTable.Data.IDefaultGetDataProvider) => {
                 ngTableDefaultGetDataProvider=_ngTableDefaultGetDataProvider_;
             });
         });
@@ -22,13 +22,13 @@ describe('ngTableDefaultGetData', () => {
     });
 
     describe('service', () => {
-        let ngTableDefaultGetData : NgTable.IDefaultGetData<any>,
+        let ngTableDefaultGetData : NgTable.Data.IDefaultGetData<any>,
             tableParams: NgTableParams<any>;
 
         beforeEach(angular.mock.module('ngTable'));
 
         beforeEach(inject((
-            _ngTableDefaultGetData_: NgTable.IDefaultGetData<any>, 
+            _ngTableDefaultGetData_: NgTable.Data.IDefaultGetData<any>, 
             NgTableParams: NgTable.ITableParamsConstructor<any>) => {
             ngTableDefaultGetData = _ngTableDefaultGetData_;
             tableParams = new NgTableParams({ count: 10 }, {counts: [10]});
@@ -243,7 +243,7 @@ describe('ngTableDefaultGetData', () => {
     });
 
     describe('service, custom filters', () => {
-        var ngTableDefaultGetData: NgTable.IDefaultGetData<IPerson>, 
+        var ngTableDefaultGetData: NgTable.Data.IDefaultGetData<IPerson>, 
             tableParams: NgTableParams<IPerson>;
             
         type PersonCriteria = { ages: number[]};
@@ -266,7 +266,7 @@ describe('ngTableDefaultGetData', () => {
         });
 
         beforeEach(inject((
-            _ngTableDefaultGetData_: NgTable.IDefaultGetData<IPerson>, 
+            _ngTableDefaultGetData_: NgTable.Data.IDefaultGetData<IPerson>, 
             NgTableParams: NgTable.ITableParamsConstructor<IPerson>) => {
             ngTableDefaultGetData = _ngTableDefaultGetData_;
             tableParams = new NgTableParams({count: 10}, {counts: [10]});

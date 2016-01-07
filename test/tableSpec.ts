@@ -8,17 +8,17 @@ describe('ng-table', function() {
     
     interface INgTableChildScope extends ng.IScope {
         params: NgTableParams<any>;
-        $columns: NgTable.IColumnDef[];
+        $columns: NgTable.Columns.IColumnDef[];
     }
     
     interface ICustomizedScope extends ng.IScope {
         $$childHead: INgTableChildScope;
-        ageFilter: NgTable.IFilterTemplateMap;
+        ageFilter: NgTable.IFilterTemplateDefMap;
         ageExpandedFilter: { [name: string] : NgTable.IFilterTemplateDef};
         ageTitle: string | {(): string};
-        captureColumn : ($columnDef: NgTable.IColumnDef) => any;
-        getCustomClass($column: NgTable.IColumnDef): string;
-        getFilter($column: NgTable.IColumnDef): NgTable.IFilterTemplateMap;
+        captureColumn : ($columnDef: NgTable.Columns.IColumnDef) => any;
+        getCustomClass($column: NgTable.Columns.IColumnDef): string;
+        getFilter($column: NgTable.Columns.IColumnDef): NgTable.IFilterTemplateDefMap;
         isAgeVisible: boolean;
         nameTitle(): string;
         money: () => ng.IPromise<NgTable.ISelectOption[]>;
@@ -28,7 +28,7 @@ describe('ng-table', function() {
         showMoney: boolean;
         showName: boolean;
         tableParams: NgTableParams<IPerson>;
-        usernameFilter: NgTable.IFilterTemplateMap;
+        usernameFilter: NgTable.IFilterTemplateDefMap;
         usernameExpandedFilter: { [name: string] : NgTable.IFilterTemplateDef};
     }
     
@@ -333,7 +333,7 @@ describe('ng-table', function() {
     describe('sorting', function() {
 
         it('should provide $column definition', inject(function($compile: ng.ICompileService) {
-            var columnDef: NgTable.IColumnDef;
+            var columnDef: NgTable.Columns.IColumnDef;
             var elm = angular.element(
                     '<table ng-table="tableParams">' +
                     '<tr ng-repeat="user in $data">' +
@@ -452,7 +452,7 @@ describe('ng-table', function() {
 
     describe('filters', function(){
 
-        var $capturedColumn: NgTable.IColumnDef;
+        var $capturedColumn: NgTable.Columns.IColumnDef;
         beforeEach(inject(function() {
             // stash a reference to $column definition so that its available in asserts
             scope.captureColumn = function ($column) {
@@ -626,7 +626,7 @@ describe('ng-table', function() {
         describe('dynamic filter', function(){
 
             var elm: ng.IAugmentedJQuery,
-                ageFilter: NgTable.IFilterTemplateMap;
+                ageFilter: NgTable.IFilterTemplateDefMap;
             beforeEach(inject(function($compile: ng.ICompileService) {
 
                 ageFilter = {age: 'text'};
@@ -904,7 +904,7 @@ describe('ng-table', function() {
             expect(ageCol.show()).toBe(false);
             expect(scope.isAgeVisible).toBe(false);
 
-            var newFilter: NgTable.IFilterTemplateMap = {age: 'select'};
+            var newFilter: NgTable.IFilterTemplateDefMap = {age: 'select'};
             ageCol.filter.assign(scope.$$childHead, newFilter);
             expect(ageCol.filter()).toBe(newFilter);
             expect(scope.ageFilter).toBe(newFilter);
@@ -941,7 +941,7 @@ describe('ng-table', function() {
 
     describe('groups', function(){
 
-        var $capturedColumn: NgTable.IColumnDef;
+        var $capturedColumn: NgTable.Columns.IColumnDef;
         beforeEach(inject(function() {
             // stash a reference to $column definition so that its available in asserts
             scope.captureColumn = function ($column) {

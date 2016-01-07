@@ -14,7 +14,7 @@ describe('NgTableParams', () => {
 
 
             createSpy.$inject = ['$delegate'];
-            function createSpy(ngTableDefaultGetData: NgTable.IDefaultGetData<any>){
+            function createSpy(ngTableDefaultGetData: NgTable.Data.IDefaultGetData<any>){
                 return jasmine.createSpy('ngTableDefaultGetDataSpy',ngTableDefaultGetData).and.callThrough();
             }
         });
@@ -458,13 +458,13 @@ describe('NgTableParams', () => {
         it('should group data then apply paging to groups', () => {
             var tp = createNgTableParams({ count: 2, group: { role: '' } }, { dataset: dataset });
 
-            var actualRoleGroups: NgTable.IDataRowGroup<IEmployee>[];
-            tp.reload<NgTable.IDataRowGroup<IEmployee>>().then(groups => {
+            var actualRoleGroups: NgTable.Data.IDataRowGroup<IEmployee>[];
+            tp.reload<NgTable.Data.IDataRowGroup<IEmployee>>().then(groups => {
                 actualRoleGroups = groups;
             });
             $rootScope.$digest();
 
-            var expectedRoleGroups: NgTable.IDataRowGroup<IEmployee>[] = [
+            var expectedRoleGroups: NgTable.Data.IDataRowGroup<IEmployee>[] = [
                 {
                     $hideRows: false,
                     value: 'Accounting',
@@ -493,8 +493,8 @@ describe('NgTableParams', () => {
                 group: { role: '' }
             }, { dataset: dataset });
 
-            var actualRoleGroups: NgTable.IDataRowGroup<IEmployee>[];
-            tp.reload<NgTable.IDataRowGroup<IEmployee>>().then(groups => {
+            var actualRoleGroups: NgTable.Data.IDataRowGroup<IEmployee>[];
+            tp.reload<NgTable.Data.IDataRowGroup<IEmployee>>().then(groups => {
                 actualRoleGroups = groups;
             });
             $rootScope.$digest();
@@ -528,8 +528,8 @@ describe('NgTableParams', () => {
                 group: grouper
             }, {dataset: dataset});
 
-            var actualRoleGroups: NgTable.IDataRowGroup<IEmployee>[];
-            tp.reload<NgTable.IDataRowGroup<IEmployee>>().then(groups => {
+            var actualRoleGroups: NgTable.Data.IDataRowGroup<IEmployee>[];
+            tp.reload<NgTable.Data.IDataRowGroup<IEmployee>>().then(groups => {
                 actualRoleGroups = groups;
             });
             $rootScope.$digest();
@@ -565,8 +565,8 @@ describe('NgTableParams', () => {
                 dataset: dataset
             });
 
-            var actualRoleGroups: NgTable.IDataRowGroup<IEmployee>[];
-            tp.reload<NgTable.IDataRowGroup<IEmployee>>().then(groups => {
+            var actualRoleGroups: NgTable.Data.IDataRowGroup<IEmployee>[];
+            tp.reload<NgTable.Data.IDataRowGroup<IEmployee>>().then(groups => {
                 actualRoleGroups = groups;
             });
             $rootScope.$digest();
@@ -604,8 +604,8 @@ describe('NgTableParams', () => {
                 }
             });
 
-            var actualRoleGroups: NgTable.IDataRowGroup<IEmployee>[];
-            tp.reload<NgTable.IDataRowGroup<IEmployee>>().then(groups => {
+            var actualRoleGroups: NgTable.Data.IDataRowGroup<IEmployee>[];
+            tp.reload<NgTable.Data.IDataRowGroup<IEmployee>>().then(groups => {
                 actualRoleGroups = groups;
             });
             $rootScope.$digest();
@@ -652,8 +652,8 @@ describe('NgTableParams', () => {
                 }
             });
 
-            var actualRoleGroups: NgTable.IDataRowGroup<IEmployee>[];
-            tp.reload<NgTable.IDataRowGroup<IEmployee>>().then(groups => {
+            var actualRoleGroups: NgTable.Data.IDataRowGroup<IEmployee>[];
+            tp.reload<NgTable.Data.IDataRowGroup<IEmployee>>().then(groups => {
                 actualRoleGroups = groups;
             });
             $rootScope.$digest();
@@ -714,13 +714,13 @@ describe('NgTableParams', () => {
         it('should group data then apply paging to groups', () => {
             var tp = createNgTableParams({ count: 2, group: { 'details.role': '' } }, { dataset: dataset });
 
-            var actualRoleGroups: NgTable.IDataRowGroup<IComplexEmployee>[];
-            tp.reload<NgTable.IDataRowGroup<IComplexEmployee>>().then(groups => {
+            var actualRoleGroups: NgTable.Data.IDataRowGroup<IComplexEmployee>[];
+            tp.reload<NgTable.Data.IDataRowGroup<IComplexEmployee>>().then(groups => {
                 actualRoleGroups = groups;
             });
             $rootScope.$digest();
 
-            let expectedRoleGroups: NgTable.IDataRowGroup<IComplexEmployee>[] = [
+            let expectedRoleGroups: NgTable.Data.IDataRowGroup<IComplexEmployee>[] = [
                 {
                     $hideRows: false,
                     value: 'Accounting',
@@ -749,13 +749,13 @@ describe('NgTableParams', () => {
                 group: { 'details.role': '' }
             }, { dataset: dataset });
 
-            var actualRoleGroups: NgTable.IDataRowGroup<IComplexEmployee>[];
-            tp.reload<NgTable.IDataRowGroup<IComplexEmployee>>().then(groups => {
+            var actualRoleGroups: NgTable.Data.IDataRowGroup<IComplexEmployee>[];
+            tp.reload<NgTable.Data.IDataRowGroup<IComplexEmployee>>().then(groups => {
                 actualRoleGroups = groups;
             });
             $rootScope.$digest();
 
-            let expectedRoleGroups: NgTable.IDataRowGroup<IComplexEmployee>[] = [
+            let expectedRoleGroups: NgTable.Data.IDataRowGroup<IComplexEmployee>[] = [
                 {
                     $hideRows: false,
                     value: 'Asset Management',
@@ -785,13 +785,13 @@ describe('NgTableParams', () => {
                 group: grouper
             }, {dataset: dataset});
 
-            var actualRoleGroups: NgTable.IDataRowGroup<IComplexEmployee>[];
-            tp.reload<NgTable.IDataRowGroup<IComplexEmployee>>().then(groups => {
+            var actualRoleGroups: NgTable.Data.IDataRowGroup<IComplexEmployee>[];
+            tp.reload<NgTable.Data.IDataRowGroup<IComplexEmployee>>().then(groups => {
                 actualRoleGroups = groups;
             });
             $rootScope.$digest();
 
-            let expectedRoleGroups: NgTable.IDataRowGroup<IComplexEmployee>[] = [
+            let expectedRoleGroups: NgTable.Data.IDataRowGroup<IComplexEmployee>[] = [
                 {
                     $hideRows: false,
                     value: 'Y',
@@ -823,13 +823,13 @@ describe('NgTableParams', () => {
                 dataset: dataset
             });
 
-            var actualRoleGroups: NgTable.IDataRowGroup<IComplexEmployee>[];
-            tp.reload<NgTable.IDataRowGroup<IComplexEmployee>>().then(groups => {
+            var actualRoleGroups: NgTable.Data.IDataRowGroup<IComplexEmployee>[];
+            tp.reload<NgTable.Data.IDataRowGroup<IComplexEmployee>>().then(groups => {
                 actualRoleGroups = groups;
             });
             $rootScope.$digest();
 
-            let expectedRoleGroups: NgTable.IDataRowGroup<IComplexEmployee>[] = [
+            let expectedRoleGroups: NgTable.Data.IDataRowGroup<IComplexEmployee>[] = [
                 {
                     $hideRows: false,
                     value: 'Accounting',
@@ -863,13 +863,13 @@ describe('NgTableParams', () => {
                 }
             });
 
-            var actualRoleGroups: NgTable.IDataRowGroup<IComplexEmployee>[];
-            tp.reload<NgTable.IDataRowGroup<IComplexEmployee>>().then(groups => {
+            var actualRoleGroups: NgTable.Data.IDataRowGroup<IComplexEmployee>[];
+            tp.reload<NgTable.Data.IDataRowGroup<IComplexEmployee>>().then(groups => {
                 actualRoleGroups = groups;
             });
             $rootScope.$digest();
             
-            let expectedRoleGroups: NgTable.IDataRowGroup<IComplexEmployee>[] = [
+            let expectedRoleGroups: NgTable.Data.IDataRowGroup<IComplexEmployee>[] = [
                 {
                     $hideRows: false,
                     value: 'Payroll',
@@ -912,13 +912,13 @@ describe('NgTableParams', () => {
                 }
             });
 
-            var actualRoleGroups: NgTable.IDataRowGroup<IComplexEmployee>[];
-            tp.reload<NgTable.IDataRowGroup<IComplexEmployee>>().then(groups => {
+            var actualRoleGroups: NgTable.Data.IDataRowGroup<IComplexEmployee>[];
+            tp.reload<NgTable.Data.IDataRowGroup<IComplexEmployee>>().then(groups => {
                 actualRoleGroups = groups;
             });
             $rootScope.$digest();
 
-            let expectedRoleGroups: NgTable.IDataRowGroup<IComplexEmployee>[] = [
+            let expectedRoleGroups: NgTable.Data.IDataRowGroup<IComplexEmployee>[] = [
                 {
                     $hideRows: false,
                     value: 'Payroll',
@@ -1265,7 +1265,7 @@ describe('NgTableParams', () => {
 
     describe('backwards compatibility shim', () => {
 
-        it('shim should supply getData original arguments', inject((ngTableGetDataBcShim: NgTable.IGetDataBcShimFunc<any>) => {
+        it('shim should supply getData original arguments', inject((ngTableGetDataBcShim: NgTable.Data.IGetDataBcShimFunc<any>) => {
             // given
             var callCount = 0;
             var adaptedFn = ngTableGetDataBcShim(originalGetDataFn);
@@ -1287,7 +1287,7 @@ describe('NgTableParams', () => {
 
         }));
 
-        it('shim should return the getData "$defer" promise', inject((ngTableGetDataBcShim: NgTable.IGetDataBcShimFunc<any>) => {
+        it('shim should return the getData "$defer" promise', inject((ngTableGetDataBcShim: NgTable.Data.IGetDataBcShimFunc<any>) => {
             // given
             var adaptedFn = ngTableGetDataBcShim(originalGetDataFn);
 
@@ -1308,7 +1308,7 @@ describe('NgTableParams', () => {
             }
         }));
 
-        it('shim should return the data', inject((ngTableGetDataBcShim: NgTable.IGetDataBcShimFunc<number>) => {
+        it('shim should return the data', inject((ngTableGetDataBcShim: NgTable.Data.IGetDataBcShimFunc<number>) => {
             // given
             var adaptedFn = ngTableGetDataBcShim(originalGetDataFn);
 
@@ -1722,9 +1722,9 @@ describe('NgTableParams', () => {
         var actualEventArgs: any[],
             actualPublisher: NgTableParams<any>,
             fakeTableParams: NgTable.InternalTableParams<any>,
-            ngTableEventsChannel: NgTable.IEventsChannel & {[name: string] : Function};
+            ngTableEventsChannel: NgTable.Events.IEventsChannel & {[name: string] : Function};
 
-        beforeEach(inject((_ngTableEventsChannel_: NgTable.IEventsChannel & {[name: string] : Function}) => {
+        beforeEach(inject((_ngTableEventsChannel_: NgTable.Events.IEventsChannel & {[name: string] : Function}) => {
             ngTableEventsChannel = _ngTableEventsChannel_;
             fakeTableParams = {} as any;
             actualPublisher = undefined;

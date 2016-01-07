@@ -1,7 +1,5 @@
 /// <reference path="../angularjs/angular.d.ts" />
 
-declare type DataResult<T> = T | NgTable.IDataRowGroup<T>;
-
 /**
  * Parameters manager for an ngTable directive
  */
@@ -95,7 +93,7 @@ declare class NgTableParams<T> {
     /**
      * Trigger a reload of the data rows
      */
-    reload<TResult extends DataResult<T>>(): ng.IPromise<TResult[]>
+    reload<TResult extends NgTable.Data.DataResult<T>>(): ng.IPromise<TResult[]>
     /**
      * Returns the settings for the table.
      */
@@ -155,18 +153,9 @@ declare class NgTableParams<T> {
 }
 
 declare namespace NgTable {
-    
-    interface InternalTableParams<T> extends NgTableParams<T> {
-        isNullInstance: boolean
-    }
-    
-    /**
-     * A custom object that can be registered with an NgTableParams instance that can be used
-     * to post-process the results (and failures) returned by its `getData` function
-     */
-    interface IInterceptor<T> {
-        response?: <TData>(data: TData, params: NgTableParams<T>) => TData;
-        responseError?: (reason: any, params: NgTableParams<T>) => any;
+        
+    interface IDataSettings {
+        applyPaging?: boolean;
     }
     
     /**
@@ -177,16 +166,24 @@ declare namespace NgTable {
         params? : IParamValues;
         settings?: ISettings<any>
     }
+
+    /**
+     * Map of the names of fields declared on a data row and the corrosponding filter value
+     */
+    interface IFilterValues { [name: string]: any }
     
     /**
-     * Definition of the buttons rendered by the data row pager directive
+     * Map of the names of fields on a data row and the corrosponding sort direction;
+     * Set the value of a key to undefined to let value of `ISettings.defaultSort` apply
      */
-    interface IPageButton {
-        type: string;
-        number?: number;
-        active: boolean;
-        current?: boolean;
-    }
+    interface ISortingValues { [name: string]: string }
+    
+    type Grouping = IGroupValues | IGroupingFunc;
+
+    /**
+     * Map of the names of fields on a data row and the corrosponding sort direction
+     */
+    interface IGroupValues { [name: string]: string }
     
     /**
      * Signature of a function that should return the name of the group
@@ -199,25 +196,7 @@ declare namespace NgTable {
          */
         sortDirection?: string
     }
-
-    /**
-     * Map of the names of fields declared on a data row and the corrosponding filter value
-     */
-    interface IFilterValues { [name: string]: any }
-    
-    /**
-     * Map of the names of fields on a data row and the corrosponding sort direction
-     */
-    interface IGroupValues { [name: string]: string }
-    
-    /**
-     * Map of the names of fields on a data row and the corrosponding sort direction;
-     * Set the value of a key to undefined to let value of `ISettings.defaultSort` apply
-     */
-    interface ISortingValues { [name: string]: string }
-    
-    type Grouping = IGroupValues | IGroupingFunc;
-    
+     
     /**
      * The runtime values for `NgTableParams` that determine the set of data rows and 
      * how they are to be displayed in a table
@@ -311,20 +290,16 @@ declare namespace NgTable {
         isExpanded?: boolean;
     }
     
-    interface IDataSettings {
-        applyPaging?: boolean;
+    /**
+     * Definition of the buttons rendered by the data row pager directive
+     */
+    interface IPageButton {
+        type: string;
+        number?: number;
+        active: boolean;
+        current?: boolean;
     }
-    
-    interface IDataRowGroup<T> {
-        data: T[];
-        $hideRows: boolean;
-        value: string;
-    }
-    
-    interface IGetGroupFunc<T> {
-        (params: NgTableParams<T>): { [name: string] : IDataRowGroup<T>[]}
-    }
-    
+        
     /**
      * Configuration settings for `NgTableParams`
      */
@@ -381,21 +356,13 @@ declare namespace NgTable {
          * Typically you will supply a custom function when you need to execute filtering, paging and sorting
          * on the server
          */
-        getData?: IGetDataFunc<T> | IInterceptableGetDataFunc<T>;
+        getData?: Data.IGetDataFunc<T> | Data.IInterceptableGetDataFunc<T>;
         /** 
          * The function that will be used group data rows according to the groupings returned by `NgTableParams.group()`
         */
-        getGroups?: IGetGroupFunc<T>;
+        getGroups?: Data.IGetGroupFunc<T>;
     }
-    
-    /**
-     * Definition of the constructor function that will construct new instances of `NgTableParams`.
-     * On construction of `NgTableParams` the `ngTableEventsChannel` will fire its `afterCreated` event.
-     */
-    interface ITableParamsConstructor<T> {
-        new(baseParameters?: IParamValues, baseSettings?: ISettings<T>): NgTableParams<T>
-    }
-    
+
     /**
      * Configuration values that determine the behaviour of the `ngTableFilterConfig` service
      */
@@ -444,7 +411,7 @@ declare namespace NgTable {
      * @example
      * vm.ageFilter = { "age": { id: "number", placeholder: "Age of person"} }
      */
-    interface IFilterTemplateMap {
+    interface IFilterTemplateDefMap {
         [name: string]: string | IFilterTemplateDef
     }
     
@@ -482,78 +449,20 @@ declare namespace NgTable {
         getUrlForAlias(aliasName: string, filterKey?: string): string
     }
     
-    /**
-     * Allows for the configuration of the ngTableDefaultGetData service.
-     */
-    interface IDefaultGetDataProvider {
-        $get<T>(): IDefaultGetData<T>;
-        /**
-         * The name of a angular filter that knows how to apply the values returned by
-         * `NgTableParams.filter()` to restrict an array of data.
-         * (defaults to the angular `filter` filter service)
-         */
-        filterFilterName: string,
-        /**
-         * The name of a angular filter that knows how to apply the values returned by
-        * `NgTableParams.orderBy()` to sort an array of data.
-        * (defaults to the angular `orderBy` filter service)
-         */
-        sortingFilterName: string
+    interface InternalTableParams<T> extends NgTableParams<T> {
+        isNullInstance: boolean
     }
     
     /**
-     * Signature of a function that will called whenever NgTable requires to load data rows
-     * into the table.
-     * `params` is the table requesting the data rows
+     * A custom object that can be registered with an NgTableParams instance that can be used
+     * to post-process the results (and failures) returned by its `getData` function
      */
-    interface IGetDataFunc<T> {
-        (params: NgTableParams<T>): T[] | ng.IPromise<T[]>;
+    interface IInterceptor<T> {
+        response?: <TData>(data: TData, params: NgTableParams<T>) => TData;
+        responseError?: (reason: any, params: NgTableParams<T>) => any;
     }
     
-    /**
-     * Variation of the `IGetDataFunc` function signature that allows for flexibility for
-     * the shape of the return value.
-     * Typcially you will use this function signature when you want to configure `NgTableParams` with
-     * interceptors that will return the final data rows array.   
-     */
-    interface IInterceptableGetDataFunc<T> {
-        <TResult>(params: NgTableParams<T>): TResult;
-    }
-
-    interface ILegacyGetDataFunc<T> {
-        ($defer: ng.IDeferred<T[]>, params: NgTableParams<T>) : void
-    }
-
-    interface IGetDataBcShimFunc<T> {
-        (originalFunc: ILegacyGetDataFunc<T>) : { (params: NgTableParams<T>): ng.IPromise<T[]> }
-    }
-    
-    /**
-     * A default implementation of the getData function that will apply the `filter`, `orderBy` and
-     * paging values from the `NgTableParams` instance supplied to the data array supplied.
-     * 
-     * A call to this function will:
-     * - return the resulting array
-     * - assign the total item count after filtering to the `total` of the `NgTableParams` instance supplied
-     */
-    interface IDefaultGetData<T> {
-        (data: T[], params: NgTableParams<T>): T[];
-        /**
-         * Convenience function that this service will use to apply paging to the data rows.
-         * 
-         * Returns a slice of rows from the `data` array supplied and sets the `NgTableParams.total()`
-         * on the `params` instance supplied to `data.length`
-         */
-        applyPaging(data: T[], params: NgTableParams<T>): T[],
-        /**
-         * Returns a reference to the function that this service will use to filter data rows
-         */
-        getFilterFn(params: NgTableParams<T>): IFilterFunc<T>,
-        /**
-         * Returns a reference to the function that this service will use to sort data rows
-         */
-        getOrderByFn(params?: NgTableParams<T>): void
-    }
+    type SelectData = ISelectOption[] | ISelectDataFunc    
     
     interface ISelectOption {
         id: string | number;
@@ -563,8 +472,103 @@ declare namespace NgTable {
     interface ISelectDataFunc {
         () : ISelectOption[] | ng.IPromise<ISelectOption[]>
     }    
+        
+    /**
+     * Definition of the constructor function that will construct new instances of `NgTableParams`.
+     * On construction of `NgTableParams` the `ngTableEventsChannel` will fire its `afterCreated` event.
+     */
+    interface ITableParamsConstructor<T> {
+        new(baseParameters?: IParamValues, baseSettings?: ISettings<T>): NgTableParams<T>
+    }
     
-    type SelectData = ISelectOption[] | ISelectDataFunc
+
+    namespace Data {
+        
+        type DataResult<T> = T | IDataRowGroup<T>;
+        
+        interface IDataRowGroup<T> {
+            data: T[];
+            $hideRows: boolean;
+            value: string;
+        }
+             
+        /**
+         * A default implementation of the getData function that will apply the `filter`, `orderBy` and
+         * paging values from the `NgTableParams` instance supplied to the data array supplied.
+         * 
+         * A call to this function will:
+         * - return the resulting array
+         * - assign the total item count after filtering to the `total` of the `NgTableParams` instance supplied
+         */
+        interface IDefaultGetData<T> {
+            (data: T[], params: NgTableParams<T>): T[];
+            /**
+             * Convenience function that this service will use to apply paging to the data rows.
+             * 
+             * Returns a slice of rows from the `data` array supplied and sets the `NgTableParams.total()`
+             * on the `params` instance supplied to `data.length`
+             */
+            applyPaging(data: T[], params: NgTableParams<T>): T[],
+            /**
+             * Returns a reference to the function that this service will use to filter data rows
+             */
+            getFilterFn(params: NgTableParams<T>): IFilterFunc<T>,
+            /**
+             * Returns a reference to the function that this service will use to sort data rows
+             */
+            getOrderByFn(params?: NgTableParams<T>): void
+        }   
+
+        /**
+         * Allows for the configuration of the ngTableDefaultGetData service.
+         */
+        interface IDefaultGetDataProvider {
+            $get<T>(): IDefaultGetData<T>;
+            /**
+             * The name of a angular filter that knows how to apply the values returned by
+             * `NgTableParams.filter()` to restrict an array of data.
+             * (defaults to the angular `filter` filter service)
+             */
+            filterFilterName: string,
+            /**
+             * The name of a angular filter that knows how to apply the values returned by
+            * `NgTableParams.orderBy()` to sort an array of data.
+            * (defaults to the angular `orderBy` filter service)
+            */
+            sortingFilterName: string
+        }
+        
+        interface IGetDataBcShimFunc<T> {
+            (originalFunc: ILegacyGetDataFunc<T>) : { (params: NgTableParams<T>): ng.IPromise<T[]> }
+        }
+        
+        /**
+         * Signature of a function that will called whenever NgTable requires to load data rows
+         * into the table.
+         * `params` is the table requesting the data rows
+         */
+        interface IGetDataFunc<T> {
+            (params: NgTableParams<T>): T[] | ng.IPromise<T[]>;
+        }
+        
+        interface IGetGroupFunc<T> {
+            (params: NgTableParams<T>): { [name: string] : IDataRowGroup<T>[]}
+        }
+        
+        /**
+         * Variation of the `IGetDataFunc` function signature that allows for flexibility for
+         * the shape of the return value.
+         * Typcially you will use this function signature when you want to configure `NgTableParams` with
+         * interceptors that will return the final data rows array.   
+         */
+        interface IInterceptableGetDataFunc<T> {
+            <TResult>(params: NgTableParams<T>): TResult;
+        }
+
+        interface ILegacyGetDataFunc<T> {
+            ($defer: ng.IDeferred<T[]>, params: NgTableParams<T>) : void
+        }     
+    }
     
     namespace Events {
         interface IEventSelectorFunc {
@@ -580,233 +584,238 @@ declare namespace NgTable {
             (publisher: NgTableParams<any>) : any 
         }
         interface IAfterReloadDataListener {
-            (publisher: NgTableParams<any>, newData: DataResult<any>[], oldData: DataResult<any>[]) : any 
+            (publisher: NgTableParams<any>, newData: NgTable.Data.DataResult<any>[], oldData: NgTable.Data.DataResult<any>[]) : any 
         }
         interface IPagesChangedListener {
             (publisher: NgTableParams<any>, newPages: NgTable.IPageButton[], oldPages: NgTable.IPageButton[]) : any 
         }
+        
+        interface IEventsChannel {
+            /**
+             * Subscribe to receive notification whenever a new `NgTableParams` instance has finished being constructed.
+             * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called. Supply a
+             * `scope` to have angular automatically unregister the listener when the `scope` is destroyed.
+             * 
+             * @param listener the function that will be called when the event fires
+             * @param scope the angular `$scope` that will limit the lifetime of the event subscription
+             * @param eventFilter a predicate function that should return true to receive the event
+             */
+            onAfterCreated(listener: Events.IAfterCreatedListener, scope: ng.IScope, eventFilter?: Events.IEventSelectorFunc): Function;
+            /**
+             * Subscribe to receive notification whenever a new `NgTableParams` instance has finished being constructed.
+             * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called.
+             * 
+             * @param listener the function that will be called when the event fires
+             * @param eventFilter a predicate function that should return true to receive the event
+             */
+            onAfterCreated(listener: Events.IAfterCreatedListener, eventFilter?: Events.IEventSelectorFunc): Function;
+            /**
+             * Subscribe to receive notification whenever the `reload` method of an `NgTableParams` instance has successfully executed
+             * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called. Supply a
+             * `scope` to have angular automatically unregister the listener when the `scope` is destroyed.
+             * 
+             * @param listener the function that will be called when the event fires
+             * @param scope the angular `$scope` that will limit the lifetime of the event subscription
+             * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
+             */
+            onAfterReloadData(listener: Events.IAfterReloadDataListener, scope: ng.IScope, eventFilter?: Events.EventSelector): Function;
+            /**
+             * Subscribe to receive notification whenever the `reload` method of an `NgTableParams` instance has successfully executed
+             * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called.
+             * 
+             * @param listener the function that will be called when the event fires
+             * @param eventFilter a predicate function that should return true to receive the event
+             */
+            onAfterReloadData(listener: Events.IAfterReloadDataListener, eventFilter?: Events.EventSelector): Function;
+            
+            /**
+             * Subscribe to receive notification whenever a new data rows *array* is supplied as a `settings` value to a `NgTableParams` instance.
+             * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called. Supply a
+             * `scope` to have angular automatically unregister the listener when the `scope` is destroyed.
+             * 
+             * @param listener the function that will be called when the event fires
+             * @param scope the angular `$scope` that will limit the lifetime of the event subscription
+             * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
+             */
+            onDatasetChanged(listener: Events.IDatasetChangedListener, scope: ng.IScope, eventFilter?: Events.EventSelector): Function;
+            /**
+             * Subscribe to receive notification whenever a new data rows *array* is supplied as a `settings` value to a `NgTableParams` instance.
+             * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called.
+             * 
+             * @param listener the function that will be called when the event fires
+             * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
+             */
+            onDatasetChanged(listener: Events.IDatasetChangedListener, eventFilter?: Events.EventSelector): Function;
+            
+            /**
+             * Subscribe to receive notification whenever the paging buttons for an `NgTableParams` instance change
+             * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called. Supply a
+             * `scope` to have angular automatically unregister the listener when the `scope` is destroyed.
+             * 
+             * @param listener the function that will be called when the event fires
+             * @param scope the angular `$scope` that will limit the lifetime of the event subscription
+             * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
+             */
+            onPagesChanged(listener: Events.IPagesChangedListener, scope: ng.IScope, eventFilter?: Events.EventSelector): Function;
+            /**
+             * Subscribe to receive notification whenever the paging buttons for an `NgTableParams` instance change
+             * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called.
+             * 
+             * @param listener the function that will be called when the event fires
+             * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
+             */
+            onPagesChanged(listener: Events.IPagesChangedListener, eventFilter?: Events.EventSelector): Function;
+            
+            publishAfterCreated<T>(publisher: NgTableParams<T>): void;
+            publishAfterReloadData<T>(publisher: NgTableParams<T>, newData: T[], oldData: T[]): void;
+            publishDatasetChanged<T>(publisher: NgTableParams<T>, newDataset: T[], oldDataset: T[]): void;
+            publishPagesChanged<T>(publisher: NgTableParams<T>, newPages: NgTable.IPageButton[], oldPages: NgTable.IPageButton[]): void;
+        }
+    }    
+    
+    namespace Columns {
+        
+        type ColumnFieldContext = ng.IScope & { 
+            $column: IColumnDef;
+            $columns: IColumnDef[];
+        }
+        
+        interface IColumnField<T> {
+            (context?: ColumnFieldContext) : T;
+            assign($scope: ng.IScope, value: T): void;
+        }
+        
+        /**
+         * The definition of the column within a ngTable.
+         * When using `ng-table` directive a column definition will be parsed from each `td` tag found in the
+         * `tr` data row tag.
+         * 
+         * @example
+         * <tr>
+         *  <td data-title="'Name of User'" filter="{ username: 'text'}" sortable="'username'" />
+         *  <td data-title="'Age of User'" filter="{ age: 'number'}" sortable="'age'" />
+         * </tr>
+         */
+        interface IColumnDef {
+            /**
+             * Custom CSS class that should be added to the `th` tag(s) of this column in the table header
+             * 
+             * To set this on the `td` tag of a html table use the attribute `header-class` or `data-header-class`
+             */
+            class: IColumnField<string>;
+            /**
+             * The `ISelectOption`s that can be used in a html filter template for this colums.
+             */
+            data?: SelectData;
+            /**
+             * The index position of this column within the `$columns` container array 
+             */
+            id: number;
+            /**
+             * The definition of 0 or more html filter templates that should be rendered for this column in
+             * the table header
+             */
+            filter: IColumnField<IFilterTemplateDefMap>;
+            /**
+             * Supplies the `ISelectOption`s that can be used in a html filter template for this colums.
+             * At the creation of the `NgTableParams` this field will be called and the result then assigned
+             * to the `data` field of this column.
+             */
+            filterData: IColumnField<ng.IPromise<SelectData> | SelectData>;
+            /**
+             * The name of the data row field that will be used to group on, or false when this column
+             * does not support grouping
+             */
+            groupable: IColumnField<string|boolean>;
+            /**
+             * The url of a custom html template that should be used to render a table header for this column
+             * 
+             * To set this on the `td` tag for a html table use the attribute `header` or `data-header`
+             */
+            headerTemplateURL: IColumnField<string|boolean>;
+            /**
+             * The text that should be used as a tooltip for this column in the table header
+             */
+            headerTitle: IColumnField<string>;
+            /**
+             * Determines whether this column should be displayed in the table
+             * 
+             * To set this on the `td` tag for a html table use the attribute `ng-if`
+             */
+            show: IColumnField<boolean>;
+            /**
+             * The name of the data row field that will be used to sort on, or false when this column
+             * does not support sorting
+             */
+            sortable: IColumnField<string|boolean>;
+            /**
+             * The title of this column that should be displayed in the table header
+             */
+            title: IColumnField<string>;
+            /**
+             * An alternate column title. Typically this can be used for responsive table layouts
+             * where the titleAlt should be used for small screen sizes
+             */
+            titleAlt: IColumnField<string>;
+        }
+        
+        type DynamicTableColField<T> = IDynamicTableColFieldFunc<T> | T;
+        
+        interface IDynamicTableColFieldFunc<T> {
+            (context: ColumnFieldContext): T;
+        }
+        
+        /**
+         * The definition of the column supplied to a ngTableDynamic directive.
+         */
+        interface IDynamicTableColDef {
+            /**
+             * Custom CSS class that should be added to the `th` tag(s) of this column in the table header
+             */
+            class?: DynamicTableColField<string>;
+            /**
+             * The definition of 0 or more html filter templates that should be rendered for this column in
+             * the table header
+             */
+            filter?: DynamicTableColField<IFilterTemplateDefMap>;
+            /**
+             * Supplies the `ISelectOption`s that can be used in a html filter template for this colums.
+             * At the creation of the `NgTableParams` this field will be called and the result then assigned
+             * to the `data` field of this column.
+             */
+            filterData?: DynamicTableColField<ng.IPromise<SelectData> | SelectData>;
+            /**
+             * The name of the data row field that will be used to group on, or false when this column
+             * does not support grouping
+             */
+            groupable?: DynamicTableColField<string|boolean>;
+            /**
+             * The url of a custom html template that should be used to render a table header for this column
+             */
+            headerTemplateURL?: DynamicTableColField<string|boolean>;
+            /**
+             * The text that should be used as a tooltip for this column in the table header
+             */
+            headerTitle?: DynamicTableColField<string>;
+            /**
+             * Determines whether this column should be displayed in the table
+             */
+            show?: DynamicTableColField<boolean>;
+            /**
+             * The name of the data row field that will be used to sort on, or false when this column
+             * does not support sorting
+             */
+            sortable?: DynamicTableColField<string>;
+            /**
+             * The title of this column that should be displayed in the table header
+             */        
+            title?: DynamicTableColField<string>;
+            /**
+             * An alternate column title. Typically this can be used for responsive table layouts
+             * where the titleAlt should be used for small screen sizes
+             */        
+            titleAlt?: DynamicTableColField<string>;
+        }
     }   
-    
-    
-    interface IEventsChannel {
-        /**
-         * Subscribe to receive notification whenever a new `NgTableParams` instance has finished being constructed.
-         * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called. Supply a
-         * `scope` to have angular automatically unregister the listener when the `scope` is destroyed.
-         * 
-         * @param listener the function that will be called when the event fires
-         * @param scope the angular `$scope` that will limit the lifetime of the event subscription
-         * @param eventFilter a predicate function that should return true to receive the event
-         */
-        onAfterCreated(listener: Events.IAfterCreatedListener, scope: ng.IScope, eventFilter?: Events.IEventSelectorFunc): Function;
-        /**
-         * Subscribe to receive notification whenever a new `NgTableParams` instance has finished being constructed.
-         * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called.
-         * 
-         * @param listener the function that will be called when the event fires
-         * @param eventFilter a predicate function that should return true to receive the event
-         */
-        onAfterCreated(listener: Events.IAfterCreatedListener, eventFilter?: Events.IEventSelectorFunc): Function;
-        /**
-         * Subscribe to receive notification whenever the `reload` method of an `NgTableParams` instance has successfully executed
-         * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called. Supply a
-         * `scope` to have angular automatically unregister the listener when the `scope` is destroyed.
-         * 
-         * @param listener the function that will be called when the event fires
-         * @param scope the angular `$scope` that will limit the lifetime of the event subscription
-         * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
-         */
-        onAfterReloadData(listener: Events.IAfterReloadDataListener, scope: ng.IScope, eventFilter?: Events.EventSelector): Function;
-        /**
-         * Subscribe to receive notification whenever the `reload` method of an `NgTableParams` instance has successfully executed
-         * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called.
-         * 
-         * @param listener the function that will be called when the event fires
-         * @param eventFilter a predicate function that should return true to receive the event
-         */
-        onAfterReloadData(listener: Events.IAfterReloadDataListener, eventFilter?: Events.EventSelector): Function;
-        
-        /**
-         * Subscribe to receive notification whenever a new data rows *array* is supplied as a `settings` value to a `NgTableParams` instance.
-         * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called. Supply a
-         * `scope` to have angular automatically unregister the listener when the `scope` is destroyed.
-         * 
-         * @param listener the function that will be called when the event fires
-         * @param scope the angular `$scope` that will limit the lifetime of the event subscription
-         * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
-         */
-        onDatasetChanged(listener: Events.IDatasetChangedListener, scope: ng.IScope, eventFilter?: Events.EventSelector): Function;
-        /**
-         * Subscribe to receive notification whenever a new data rows *array* is supplied as a `settings` value to a `NgTableParams` instance.
-         * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called.
-         * 
-         * @param listener the function that will be called when the event fires
-         * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
-         */
-        onDatasetChanged(listener: Events.IDatasetChangedListener, eventFilter?: Events.EventSelector): Function;
-        
-        /**
-         * Subscribe to receive notification whenever the paging buttons for an `NgTableParams` instance change
-         * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called. Supply a
-         * `scope` to have angular automatically unregister the listener when the `scope` is destroyed.
-         * 
-         * @param listener the function that will be called when the event fires
-         * @param scope the angular `$scope` that will limit the lifetime of the event subscription
-         * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
-         */
-        onPagesChanged(listener: Events.IPagesChangedListener, scope: ng.IScope, eventFilter?: Events.EventSelector): Function;
-        /**
-         * Subscribe to receive notification whenever the paging buttons for an `NgTableParams` instance change
-         * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called.
-         * 
-         * @param listener the function that will be called when the event fires
-         * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
-         */
-        onPagesChanged(listener: Events.IPagesChangedListener, eventFilter?: Events.EventSelector): Function;
-        
-        publishAfterCreated<T>(publisher: NgTableParams<T>): void;
-        publishAfterReloadData<T>(publisher: NgTableParams<T>, newData: T[], oldData: T[]): void;
-        publishDatasetChanged<T>(publisher: NgTableParams<T>, newDataset: T[], oldDataset: T[]): void;
-        publishPagesChanged<T>(publisher: NgTableParams<T>, newPages: NgTable.IPageButton[], oldPages: NgTable.IPageButton[]): void;
-    }
-    
-    type ColumnFieldContext = ng.IScope & { 
-        $column: IColumnDef;
-        $columns: IColumnDef[];
-    }
-    
-    interface IColumnField<T> {
-        (context?: ColumnFieldContext) : T;
-        assign($scope: ng.IScope, value: T): void;
-    }
-    
-    /**
-     * The definition of the column within a ngTable.
-     * When using `ng-table` directive a column definition will be parsed from each `td` tag found in the
-     * `tr` data row tag.
-     * 
-     * @example
-     * <tr>
-     *  <td data-title="'Name of User'" filter="{ username: 'text'}" sortable="'username'" />
-     *  <td data-title="'Age of User'" filter="{ age: 'number'}" sortable="'age'" />
-     * </tr>
-     */
-    interface IColumnDef {
-        /**
-         * Custom CSS class that should be added to the `th` tag(s) of this column in the table header
-         * 
-         * To set this on the `td` tag of a html table use the attribute `header-class` or `data-header-class`
-         */
-        class: IColumnField<string>;
-        /**
-         * The `ISelectOption`s that can be used in a html filter template for this colums.
-         */
-        data?: SelectData;
-        /**
-         * The index position of this column within the `$columns` container array 
-         */
-        id: number;
-        /**
-         * The definition of 0 or more html filter templates that should be rendered for this column in
-         * the table header
-         */
-        filter: IColumnField<IFilterTemplateMap>;
-        /**
-         * Supplies the `ISelectOption`s that can be used in a html filter template for this colums.
-         * At the creation of the `NgTableParams` this field will be called and the result then assigned
-         * to the `data` field of this column.
-         */
-        filterData: IColumnField<ng.IPromise<SelectData> | SelectData>;
-        /**
-         * The name of the data row field that will be used to group on, or false when this column
-         * does not support grouping
-         */
-        groupable: IColumnField<string|boolean>;
-        /**
-         * The url of a custom html template that should be used to render a table header for this column
-         * 
-         * To set this on the `td` tag for a html table use the attribute `header` or `data-header`
-         */
-        headerTemplateURL: IColumnField<string|boolean>;
-        /**
-         * The text that should be used as a tooltip for this column in the table header
-         */
-        headerTitle: IColumnField<string>;
-        /**
-         * Determines whether this column should be displayed in the table
-         * 
-         * To set this on the `td` tag for a html table use the attribute `ng-if`
-         */
-        show: IColumnField<boolean>;
-        /**
-         * The name of the data row field that will be used to sort on, or false when this column
-         * does not support sorting
-         */
-        sortable: IColumnField<string|boolean>;
-        /**
-         * The title of this column that should be displayed in the table header
-         */
-        title: IColumnField<string>;
-        /**
-         * An alternate column title. Typically this can be used for responsive table layouts
-         * where the titleAlt should be used for small screen sizes
-         */
-        titleAlt: IColumnField<string>;
-    }
-    
-    type DynamicTableColField<T> = IDynamicTableColFieldFunc<T> | T;
-    
-    interface IDynamicTableColFieldFunc<T> {
-        (context: ColumnFieldContext): T;
-    }
-    
-    interface IDynamicTableColDef {
-        /**
-         * Custom CSS class that should be added to the `th` tag(s) of this column in the table header
-         */
-        class?: DynamicTableColField<string>;
-        /**
-         * The definition of 0 or more html filter templates that should be rendered for this column in
-         * the table header
-         */
-        filter?: DynamicTableColField<IFilterTemplateMap>;
-        /**
-         * Supplies the `ISelectOption`s that can be used in a html filter template for this colums.
-         * At the creation of the `NgTableParams` this field will be called and the result then assigned
-         * to the `data` field of this column.
-         */
-        filterData?: DynamicTableColField<ng.IPromise<SelectData> | SelectData>;
-        /**
-         * The name of the data row field that will be used to group on, or false when this column
-         * does not support grouping
-         */
-        groupable?: DynamicTableColField<string|boolean>;
-        /**
-         * The url of a custom html template that should be used to render a table header for this column
-         */
-        headerTemplateURL?: DynamicTableColField<string|boolean>;
-        /**
-         * The text that should be used as a tooltip for this column in the table header
-         */
-        headerTitle?: DynamicTableColField<string>;
-        /**
-         * Determines whether this column should be displayed in the table
-         */
-        show?: DynamicTableColField<boolean>;
-        /**
-         * The name of the data row field that will be used to sort on, or false when this column
-         * does not support sorting
-         */
-        sortable?: DynamicTableColField<string>;
-        /**
-         * The title of this column that should be displayed in the table header
-         */        
-        title?: DynamicTableColField<string>;
-        /**
-         * An alternate column title. Typically this can be used for responsive table layouts
-         * where the titleAlt should be used for small screen sizes
-         */        
-        titleAlt?: DynamicTableColField<string>;
-    }
 }
 
