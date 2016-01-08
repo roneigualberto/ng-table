@@ -61,10 +61,10 @@ describe('ng-table', function() {
         NgTableParams = _NgTableParams_;
     }));
 
-    function createNgTableParams<T>(initialParams?: NgTable.IParamValues, settings?: NgTable.ISettings<T>) : NgTableParams<T>;
+    function createNgTableParams<T>(initialParams?: NgTable.IParamValues<T>, settings?: NgTable.ISettings<T>) : NgTableParams<T>;
     function createNgTableParams<T>(settings?: NgTable.ISettings<T>) : NgTableParams<T>;
-    function createNgTableParams(settings?: any) : NgTableParams<any> {
-        var initialParams: NgTable.IParamValues;
+    function createNgTableParams<T>(settings?: any) : NgTableParams<T> {
+        var initialParams: NgTable.IParamValues<T>;
         if (arguments.length === 2){
             initialParams = arguments[0];
             settings = arguments[1];

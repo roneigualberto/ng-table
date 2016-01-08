@@ -1,3 +1,8 @@
+// Type definitions for ng-table
+// Project: https://github.com/esvit/ng-table
+// Definitions by: Christian Crowhurst <https://github.com/christianacca>
+// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
+
 /// <reference path="../angularjs/angular.d.ts" />
 
 /**
@@ -9,7 +14,7 @@ declare class NgTableParams<T> {
      */
     data: T[];
 
-    constructor(baseParameters?: NgTable.IParamValues, baseSettings?: NgTable.ISettings<T>)
+    constructor(baseParameters?: NgTable.IParamValues<T>, baseSettings?: NgTable.ISettings<T>)
     
     /**
      * Returns the number of data rows per page
@@ -40,7 +45,7 @@ declare class NgTableParams<T> {
     /**
      * Returns the current grouping used to group the data rows
      */
-    group(): NgTable.Grouping
+    group(): NgTable.Grouping<T>
     /**
      * Sets grouping to the `field` and `sortDirection` supplied; any existing grouping will be removed
      * Changes to group will cause `isDataReloadRequired` to return true and the current `page` to be set to 1
@@ -50,7 +55,7 @@ declare class NgTableParams<T> {
      * Sets grouping to the `group` supplied; any existing grouping will be removed.
      * Changes to group will cause `isDataReloadRequired` to return true and the current `page` to be set to 1
      */
-    group(group: NgTable.Grouping): NgTableParams<T>
+    group(group: NgTable.Grouping<T>): NgTableParams<T>
     /**
      * Returns true when an attempt to `reload` the current `parameter` values have resulted in a failure.
      * This method will continue to return true until the `reload` is successfully called or when the
@@ -74,7 +79,7 @@ declare class NgTableParams<T> {
     /**
      * Returns true when the `group` and when supplied, the `sortDirection` matches an existing group
      */
-    hasGroup(group: string | NgTable.IGroupingFunc, sortDirection?: string): boolean
+    hasGroup(group: string | NgTable.IGroupingFunc<T>, sortDirection?: string): boolean
     /**
      * Return true when a change to this instance should require the `reload` method
      * to be run so as to ensure the data rows presented to the user reflects the current state.
@@ -163,7 +168,7 @@ declare namespace NgTable {
      * an instance of `NgTableParams`  
      */
     interface IDefaults {
-        params?: IParamValues;
+        params?: IParamValues<any>;
         settings?: ISettings<any>
     }
 
@@ -178,7 +183,7 @@ declare namespace NgTable {
      */
     interface ISortingValues { [name: string]: string }
 
-    type Grouping = IGroupValues | IGroupingFunc;
+    type Grouping<T> = IGroupValues | IGroupingFunc<T>;
 
     /**
      * Map of the names of fields on a data row and the corrosponding sort direction
@@ -189,8 +194,8 @@ declare namespace NgTable {
      * Signature of a function that should return the name of the group
      * that the `item` should be placed within
      */
-    interface IGroupingFunc {
-        (item: any): string;
+    interface IGroupingFunc<T> {
+        (item: T): string;
         /**
          * 'asc' or 'desc'; leave undefined to let the value of `ISettings.groupOptions.defaultSort` apply
          */
@@ -201,7 +206,7 @@ declare namespace NgTable {
      * The runtime values for `NgTableParams` that determine the set of data rows and 
      * how they are to be displayed in a table
      */
-    interface IParamValues {
+    interface IParamValues<T> {
         /**
          * The index of the "slice" of data rows, starting at 1, to be displayed by the table.
          */
@@ -221,7 +226,7 @@ declare namespace NgTable {
         /**
          * The grouping that should be applied to the data rows
          */
-        group?: string | Grouping;
+        group?: string | Grouping<T>;
     }
 
 
@@ -478,7 +483,7 @@ declare namespace NgTable {
      * On construction of `NgTableParams` the `ngTableEventsChannel` will fire its `afterCreated` event.
      */
     interface ITableParamsConstructor<T> {
-        new (baseParameters?: IParamValues, baseSettings?: ISettings<T>): NgTableParams<T>
+        new (baseParameters?: IParamValues<T>, baseSettings?: ISettings<T>): NgTableParams<T>
     }
 
 
@@ -575,19 +580,23 @@ declare namespace NgTable {
             (publisher: NgTableParams<any>): boolean
         }
 
-        type EventSelector = NgTableParams<any> | IEventSelectorFunc
+        type EventSelector<T> = NgTableParams<T> | IEventSelectorFunc
 
-        interface IDatasetChangedListener {
-            (publisher: NgTableParams<any>, newDataset: any[], oldDataset: any[]): any
+        interface IDatasetChangedListener<T> {
+            (publisher: NgTableParams<T>, newDataset: T[], oldDataset: T[]): any
         }
         interface IAfterCreatedListener {
             (publisher: NgTableParams<any>): any
         }
-        interface IAfterReloadDataListener {
-            (publisher: NgTableParams<any>, newData: NgTable.Data.DataResult<any>[], oldData: NgTable.Data.DataResult<any>[]): any
+        interface IAfterReloadDataListener<T> {
+            (publisher: NgTableParams<T>, newData: NgTable.Data.DataResult<T>[], oldData: NgTable.Data.DataResult<T>[]): any
         }
         interface IPagesChangedListener {
             (publisher: NgTableParams<any>, newPages: NgTable.IPageButton[], oldPages: NgTable.IPageButton[]): any
+        }
+        
+        interface IUnregistrationFunc {
+            (): void
         }
 
         interface IEventsChannel {
@@ -599,16 +608,18 @@ declare namespace NgTable {
              * @param listener the function that will be called when the event fires
              * @param scope the angular `$scope` that will limit the lifetime of the event subscription
              * @param eventFilter a predicate function that should return true to receive the event
+             * @return a unregistration function that when called will unregister the `listener`
              */
-            onAfterCreated(listener: Events.IAfterCreatedListener, scope: ng.IScope, eventFilter?: Events.IEventSelectorFunc): Function;
+            onAfterCreated(listener: Events.IAfterCreatedListener, scope: ng.IScope, eventFilter?: Events.IEventSelectorFunc): IUnregistrationFunc;
             /**
              * Subscribe to receive notification whenever a new `NgTableParams` instance has finished being constructed.
              * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called.
              * 
              * @param listener the function that will be called when the event fires
              * @param eventFilter a predicate function that should return true to receive the event
+             * @return a unregistration function that when called will unregister the `listener`
              */
-            onAfterCreated(listener: Events.IAfterCreatedListener, eventFilter?: Events.IEventSelectorFunc): Function;
+            onAfterCreated(listener: Events.IAfterCreatedListener, eventFilter?: Events.IEventSelectorFunc): IUnregistrationFunc;
             /**
              * Subscribe to receive notification whenever the `reload` method of an `NgTableParams` instance has successfully executed
              * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called. Supply a
@@ -617,16 +628,18 @@ declare namespace NgTable {
              * @param listener the function that will be called when the event fires
              * @param scope the angular `$scope` that will limit the lifetime of the event subscription
              * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
+             * @return a unregistration function that when called will unregister the `listener`
              */
-            onAfterReloadData(listener: Events.IAfterReloadDataListener, scope: ng.IScope, eventFilter?: Events.EventSelector): Function;
+            onAfterReloadData<T>(listener: Events.IAfterReloadDataListener<T>, scope: ng.IScope, eventFilter?: Events.EventSelector<T>): IUnregistrationFunc;
             /**
              * Subscribe to receive notification whenever the `reload` method of an `NgTableParams` instance has successfully executed
              * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called.
              * 
              * @param listener the function that will be called when the event fires
              * @param eventFilter a predicate function that should return true to receive the event
+             * @return a unregistration function that when called will unregister the `listener`
              */
-            onAfterReloadData(listener: Events.IAfterReloadDataListener, eventFilter?: Events.EventSelector): Function;
+            onAfterReloadData<T>(listener: Events.IAfterReloadDataListener<T>, eventFilter?: Events.EventSelector<T>): IUnregistrationFunc;
             
             /**
              * Subscribe to receive notification whenever a new data rows *array* is supplied as a `settings` value to a `NgTableParams` instance.
@@ -636,16 +649,18 @@ declare namespace NgTable {
              * @param listener the function that will be called when the event fires
              * @param scope the angular `$scope` that will limit the lifetime of the event subscription
              * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
+             * @return a unregistration function that when called will unregister the `listener`
              */
-            onDatasetChanged(listener: Events.IDatasetChangedListener, scope: ng.IScope, eventFilter?: Events.EventSelector): Function;
+            onDatasetChanged<T>(listener: Events.IDatasetChangedListener<T>, scope: ng.IScope, eventFilter?: Events.EventSelector<T>): IUnregistrationFunc;
             /**
              * Subscribe to receive notification whenever a new data rows *array* is supplied as a `settings` value to a `NgTableParams` instance.
              * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called.
              * 
              * @param listener the function that will be called when the event fires
              * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
+             * @return a unregistration function that when called will unregister the `listener`
              */
-            onDatasetChanged(listener: Events.IDatasetChangedListener, eventFilter?: Events.EventSelector): Function;
+            onDatasetChanged<T>(listener: Events.IDatasetChangedListener<T>, eventFilter?: Events.EventSelector<T>): IUnregistrationFunc;
             
             /**
              * Subscribe to receive notification whenever the paging buttons for an `NgTableParams` instance change
@@ -655,16 +670,18 @@ declare namespace NgTable {
              * @param listener the function that will be called when the event fires
              * @param scope the angular `$scope` that will limit the lifetime of the event subscription
              * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
+             * @return a unregistration function that when called will unregister the `listener`
              */
-            onPagesChanged(listener: Events.IPagesChangedListener, scope: ng.IScope, eventFilter?: Events.EventSelector): Function;
+            onPagesChanged<T>(listener: Events.IPagesChangedListener, scope: ng.IScope, eventFilter?: Events.EventSelector<T>): IUnregistrationFunc;
             /**
              * Subscribe to receive notification whenever the paging buttons for an `NgTableParams` instance change
              * Optionally supply an `eventFilter` to restrict which events that should trigger the `listener` to be called.
              * 
              * @param listener the function that will be called when the event fires
              * @param eventFilter either the specific `NgTableParams` instance you want to receive events for or a predicate function that should return true to receive the event
+             * @return a unregistration function that when called will unregister the `listener`
              */
-            onPagesChanged(listener: Events.IPagesChangedListener, eventFilter?: Events.EventSelector): Function;
+            onPagesChanged<T>(listener: Events.IPagesChangedListener, eventFilter?: Events.EventSelector<T>): IUnregistrationFunc;
 
             publishAfterCreated<T>(publisher: NgTableParams<T>): void;
             publishAfterReloadData<T>(publisher: NgTableParams<T>, newData: T[], oldData: T[]): void;
@@ -805,7 +822,7 @@ declare namespace NgTable {
              * The name of the data row field that will be used to sort on, or false when this column
              * does not support sorting
              */
-            sortable?: DynamicTableColField<string>;
+            sortable?: DynamicTableColField<string|boolean>;
             /**
              * The title of this column that should be displayed in the table header
              */

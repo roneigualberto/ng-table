@@ -26,10 +26,10 @@ describe('NgTableParams', () => {
         NgTableParams = _NgTableParams_;
     }));
 
-    function createNgTableParams<T>(initialParams?: NgTable.IParamValues, settings?: NgTable.ISettings<T>) : NgTableParams<T>;
+    function createNgTableParams<T>(initialParams?: NgTable.IParamValues<T>, settings?: NgTable.ISettings<T>) : NgTableParams<T>;
     function createNgTableParams<T>(settings?: NgTable.ISettings<T>) : NgTableParams<T>;
     function createNgTableParams<T>(settings?: any) : NgTableParams<T> {
-        var initialParams: NgTable.IParamValues;
+        var initialParams: NgTable.IParamValues<T>;
         if (arguments.length === 2){
             initialParams = arguments[0];
             settings = arguments[1];
@@ -222,7 +222,7 @@ describe('NgTableParams', () => {
             expect(params.group()).toEqual(angular.identity);
 
 
-            var fn: NgTable.IGroupingFunc = () => '';
+            var fn: NgTable.IGroupingFunc<any> = () => '';
             fn.sortDirection = 'desc';
             params.group(fn);
             expect(params.hasGroup(fn)).toBe(true);
@@ -520,7 +520,7 @@ describe('NgTableParams', () => {
         });
 
         it('should use group function to group data', () => {
-            var grouper: NgTable.IGroupingFunc = (item) => item.name[0];
+            var grouper: NgTable.IGroupingFunc<IEmployee> = (item) => item.name[0];
             grouper.sortDirection = '';
             var tp = createNgTableParams({
                 count: 2,
@@ -637,7 +637,7 @@ describe('NgTableParams', () => {
         });
 
         it('should use sortDirection defined on group function to sort groups', () => {
-            var groupFn: NgTable.IGroupingFunc = item => item.role;
+            var groupFn: NgTable.IGroupingFunc<IEmployee> = item => item.role;
             groupFn.sortDirection = 'desc';
             var tp = createNgTableParams({
                 count: 3,
@@ -777,7 +777,7 @@ describe('NgTableParams', () => {
         });
 
         it('should use group function to group data', () => {
-            var grouper: NgTable.IGroupingFunc = item => item.details.name[0];
+            var grouper: NgTable.IGroupingFunc<IComplexEmployee> = item => item.details.name[0];
             grouper.sortDirection = '';
             var tp = createNgTableParams({
                 count: 2,
@@ -897,7 +897,7 @@ describe('NgTableParams', () => {
         });
 
         it('should use sortDirection defined on group function to sort groups', () => {
-            var groupFn: NgTable.IGroupingFunc = item => item.details.role;
+            var groupFn: NgTable.IGroupingFunc<IComplexEmployee> = item => item.details.role;
             groupFn.sortDirection = 'desc';
             var tp = createNgTableParams({
                 count: 3,
@@ -1078,7 +1078,7 @@ describe('NgTableParams', () => {
 
             // when, then...
 
-            var grouper: NgTable.IGroupingFunc = () => '';
+            var grouper: NgTable.IGroupingFunc<any> = () => '';
             tp.group(grouper);
             expect(tp.isDataReloadRequired()).toBe(true);
 
