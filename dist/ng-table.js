@@ -1447,11 +1447,26 @@
                         'ng-table-pagination': 'params',
                         'template-url': 'templates.pagination'
                     });
-                    $element.after(paginationTemplate);
+
+                    var all = !$attrs.paginationPosition || $attrs.paginationPosition === 'all';
+
+
+                    if ($attrs.paginationPosition === 'top' || all) {
+                        var topPaginationPosition = angular.copy(paginationTemplate);
+                        $element.before(topPaginationPosition);
+                        $compile(topPaginationPosition)($scope);
+                    }
+                   
+                    if ($attrs.paginationPosition === 'bottom' || all) {
+                        var bottomPaginationPosition = angular.copy(paginationTemplate);
+                        $element.after(bottomPaginationPosition);
+                        $compile(bottomPaginationPosition)($scope);
+                    }
+                                 
                     if (headerTemplate) {
                         $compile(headerTemplate)($scope);
                     }
-                    $compile(paginationTemplate)($scope);
+                   
                 }
             };
 
